@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VertexCBF — Improving Neural Control Barrier Functions via Vertex-Restricted Control Search</title>
+<meta name="description" content="VertexCBF learns neural control barrier functions that approximate the maximal safe set, using GPU-parallel vertex-restricted tree search for supervision. CoRL 2026.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VertexCBF — CoRL 2026">
+<meta property="og:description" content="Learning neural control barrier functions via vertex-restricted control search. 15 systems, hardware experiments, code.">
+<meta property="og:image" content="https://bojan-derajic.github.io/vertexcbf-page/assets/poster/preview.jpg">
+<meta property="og:url" content="https://bojan-derajic.github.io/vertexcbf-page/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://bojan-derajic.github.io/vertexcbf-page/">
+<link rel="icon" href="assets/logo/imrc.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">VertexCBF</a>
+    <ul>
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#hardware">Hardware</a></li>
+      <li><a href="#poster">Poster</a></li>
+      <li><a href="#code">Code</a></li>
+      <li><a href="#cite">BibTeX</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ================================================================ hero -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <p class="kicker">Conference on Robot Learning (CoRL) 2026</p>
+    <h1><span class="lead">VertexCBF:</span> Improving Neural Control Barrier Functions
+        via Vertex-Restricted Control Search</h1>
+    <p class="byline">Bojan Derajić<sup>1</sup> &nbsp;·&nbsp;
+       Sebastian Bernhard<sup>2</sup> &nbsp;·&nbsp;
+       Wolfgang Hönig<sup>1,3</sup></p>
+    <p class="places"><sup>1</sup>Technical University of Berlin &nbsp;&nbsp;
+       <sup>2</sup>Technical University of Applied Sciences Augsburg &nbsp;&nbsp;
+       <sup>3</sup>Robotics Institute Germany</p>
+
+    <div class="actions">
+      <a class="btn primary" href="https://arxiv.org/abs/2609.12831">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.6 1.4H4.3a.9.9 0 0 0-.9.9v11.4a.9.9 0 0 0 .9.9h7.4a.9.9 0 0 0 .9-.9V4.6z"/><path d="M9.6 1.4v3.2h3"/></svg>
+        Paper (arXiv)</a>
+      <a class="btn" href="https://github.com/bojan-derajic/vertexcbf">
+        <svg class="solid" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8.6-.2 1.3-.3 2-.3s1.4.1 2 .3c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3-1.8 3.7-3.6 3.9.3.2.5.8.5 1.6v2.2c0 .2.1.5.6.4C13.7 14.5 16 11.5 16 8c0-4.4-3.6-8-8-8z"/></svg>
+        Code</a>
+      <a class="btn" href="assets/poster/vertexcbf-corl2026-poster.pdf">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8v7.4m0 0 2.9-2.9M8 9.2 5.1 6.3"/><path d="M2.3 11.4v2.1a.7.7 0 0 0 .7.7h10a.7.7 0 0 0 .7-.7v-2.1"/></svg>
+        Poster (PDF)</a>
+      <a class="btn" href="#cite">BibTeX</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ abstract -->
+<section id="abstract">
+  <div class="wrap">
+    <figure>
+      <a href="assets/img/compare-ip.png"><img src="assets/img/compare-ip.png"
+         alt="Learned neural CBFs for the inverted pendulum under three supervision schemes"></a>
+      <figcaption>Neural CBFs for the inverted pendulum. <b>PDE-only</b> training collapses to a
+        trivial constant with an empty safe set; supervision from <b>full-control MPPI (FCD)</b>
+        is overly conservative; <b>vertex-restricted data (VRCD, ours)</b> recovers the maximal
+        safe set almost exactly.</figcaption>
+    </figure>
+
+    <h2>Abstract</h2>
+    <p class="lede">As the number of autonomous robots continues to grow, safety becomes
+      increasingly important. Control barrier functions (CBFs) provide a theoretically grounded
+      framework for ensuring safety, but existing design methods often face limitations in
+      effectiveness, scalability, or interpretability, and may result in overly conservative
+      safe sets.</p>
+    <p>In this paper, we propose <em>VertexCBF</em>, a framework for learning neural CBFs in a
+      scalable, systematic, and explainable way. We approximate the stationary Hamilton–Jacobi
+      value function using a neural network trained via a combination of physics-informed and
+      sparsely supervised learning. By exploiting control-affine dynamics and a convex polytope
+      control set, under which the Hamiltonian is maximized at the control vertices, we
+      efficiently generate supervision points via GPU-parallel vertex-restricted tree search,
+      while a residual architecture guarantees that the learned CBF is never larger than the
+      specified constraint function. We evaluate the method on 15 systems and compare it against
+      relevant baselines, showing that it reliably recovers large safe sets where the baselines
+      are conservative or fail completely. In addition, we perform a hardware experiment in which
+      a mobile robot safely avoids pedestrians using a neural CBF trained with our method.</p>
+  </div>
+</section>
+
+<!-- ============================================================== method -->
+<section id="method">
+  <div class="wrap">
+    <h2>Method</h2>
+
+    <p>We consider control-affine dynamics \(\dot x = f(x) + g(x)u\) with a compact convex
+      polytope control set \(\mathcal U\) and a constraint set
+      \(\mathcal C = \{x : c(x) \ge 0\}\). The Hamilton–Jacobi safety value function</p>
+    <p>\[ V(x) = \sup_{u(\cdot)\,\in\,\mathcal U}\ \inf_{t\,\ge\,0}\ c\bigl(x(t)\bigr) \]</p>
+    <p>characterises the <strong>maximal safe set</strong> \(\mathcal S = \{x : V(x) \ge 0\}\),
+      the largest controlled invariant subset of \(\mathcal C\). We learn a neural
+      approximation \(V_\Theta\) and use it directly as a CBF in a QP safety filter, so that
+      the certified set \(\mathcal S_h\) is as close as possible to \(\mathcal S\).</p>
+
+    <h3>Key idea: the Hamiltonian is maximised at a control vertex</h3>
+    <div class="callout">
+      <p>The Hamiltonian is <strong>linear in the control</strong>. Over a convex polytope the
+        maximum is therefore attained at a <strong>vertex</strong>:</p>
+      <p>\[ H(x,p) = p^\top\! f(x) + \max_{u\,\in\,\mathcal V} p^\top\! g(x)\,u,
+         \qquad \mathcal V = \operatorname{vert}(\mathcal U) \]</p>
+      <p>So the search for optimal controls can be restricted to the finite set \(\mathcal V\),
+        instead of optimising over all of \(\mathcal U\).</p>
+    </div>
+
+    <div class="two">
+      <figure>
+        <img src="assets/img/vertex-max.svg" alt="A linear objective over a polytope is maximised at a vertex">
+        <figcaption>The maximiser of a linear objective over the polytope \(\mathcal U\) always
+          lies at a vertex.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/img/tree-search.svg" alt="Vertex-restricted beam search over the control tree">
+        <figcaption>Supervision labels come from a GPU-parallel beam search over the tree of
+          vertex control sequences.</figcaption>
+      </figure>
+    </div>
+
+    <h3>A CBF that cannot exceed the constraint set</h3>
+    <p>We train \(V_\Theta\) on the stationary HJB variational inequality, evaluating the
+      maximisation exactly over the finite vertex set,</p>
+    <p>\[ \min\Bigl\{\, c(x) - V(x),\ \ \max_{u\,\in\,\mathcal V}
+       \nabla V(x)^\top\!\phi(x,u) \,\Bigr\} = 0, \]</p>
+    <p>and parametrise the network as a <strong>non-negative residual</strong> of the constraint
+      function, \(V_\Theta(x) = c(x) - r_\Theta(x)\) with \(r_\Theta \ge 0\). The learned safe
+      set is therefore contained in \(\mathcal C\) by construction, and the constant solutions
+      that make the PDE objective degenerate become unnatural for the network to express — which
+      is why no pretraining and no curriculum schedule are needed.</p>
+
+    <h3>Supervision from a vertex-restricted tree search</h3>
+    <p>Labels are the value of a finite-horizon search over <em>vertex</em> control sequences,</p>
+    <p>\[ V^{K}_{\Delta t}(x) = \max_{u_0,\dots,u_{K-1}\,\in\,\mathcal V}\ \
+       \min_{0\,\le\,k\,\le\,K}\ c(x_k), \]</p>
+    <p>where the states follow the forward-Euler map
+      \(x_{k+1} = x_k + \Delta t\,\phi(x_k, u_k)\).</p>
+    <ul class="list">
+      <li>The tree has branching factor \(M = |\mathcal V|\) and depth \(K\). Beam search,
+        stochastic beam search and branch &amp; bound keep the best \(B\) partial trajectories,
+        scored by the running minimum of \(c\).</li>
+      <li>Everything is batched on the GPU across initial states, beam entries and vertices —
+        cost \(\mathcal O(NKBM)\), with no PDE solver and no sampling-based trajectory
+        optimisation.</li>
+      <li>A width-limited search returns a <strong>lower bound</strong> on the full
+        vertex-restricted value, so the label error is in the conservative direction.</li>
+    </ul>
+
+    <h3>Training objective</h3>
+    <p>\[ \mathcal L(\Theta) = \lambda\,\mathcal L_{\mathrm{PDE}}(\Theta)
+       + (1-\lambda)\,\mathcal L_{\mathrm{data}}(\Theta) \]</p>
+    <p>\(\mathcal L_{\mathrm{PDE}}\) penalises pointwise violations of the HJB-VI on densely
+      sampled unlabelled collocation states, while \(\mathcal L_{\mathrm{data}}\) regresses onto
+      the search labels at a sparse set of states, steering the optimisation away from the
+      spurious minima that the physics-informed objective admits on its own. The residual
+      \(r_\Theta\) is a sinusoidal-activation MLP with a softplus output; periodic states enter
+      as \((\cos\theta, \sin\theta)\).</p>
+  </div>
+</section>
+
+<!-- ============================================================= results -->
+<section id="results">
+  <div class="wrap">
+    <h2>Results</h2>
+
+    <h3>Where the supervision comes from</h3>
+    <figure>
+      <a href="assets/img/trajectories-ip.png"><img src="assets/img/trajectories-ip.png"
+         alt="Finite-horizon trajectories from full-control MPPI and vertex-restricted beam search"></a>
+      <figcaption>Finite-horizon trajectories for the inverted pendulum from the same 160 random
+        initial states, coloured by the worst constraint value reached along the trajectory.
+        <b>Full-control MPPI</b> spends most of its budget on interior controls that are rarely
+        optimal and keeps the system safe from only a few states; <b>vertex-restricted beam
+        search</b> succeeds from every sampled state of the true safe set.</figcaption>
+    </figure>
+
+    <h3>Validation protocol</h3>
+    <p>Because there are no formal convergence guarantees, every learned CBF is validated by
+      large-scale closed-loop rollouts from stratified initial states, under the
+      Hamiltonian-maximising policy. We report three complementary metrics:</p>
+    <ul class="list">
+      <li>\(\rho_{\mathrm{FS}}\) — <strong>false-safe rate</strong>: the fraction of states in the
+        predicted safe set whose rollout leaves \(\mathcal C\). <em>Is the certificate
+        trustworthy?</em></li>
+      <li>\(\rho_{\mathrm{FU}}\) — <strong>false-unsafe rate</strong>: the fraction of states
+        outside the predicted safe set whose rollout stays safe. <em>How conservative is
+        it?</em></li>
+      <li>\(\eta_{\mathrm{eff}}\) — <strong>effective safe volume</strong>: the share of the state
+        space that is both predicted <em>and</em> validated safe.</li>
+    </ul>
+    <p>A good method has small \(\rho_{\mathrm{FS}}\) and large \(\eta_{\mathrm{eff}}\). We compare
+      three supervision schemes that share the same architecture, hyperparameters and validation
+      protocol, and differ only in the training labels: <strong>ND</strong> (no data, PDE loss
+      only), <strong>FCD</strong> (full-control data from MPPI) and <strong>VRCD</strong>
+      (vertex-restricted control data, ours).</p>
+
+    <div class="scroller wide">
+    <table>
+      <thead>
+        <tr><th rowspan="2">System <span class="dim">(n<sub>x</sub>, n<sub>u</sub>)</span></th>
+            <th colspan="3" class="group">&rho;<sub>FS</sub> (%) &darr;</th><th colspan="3" class="group">&rho;<sub>FU</sub> (%) &darr;</th><th colspan="3" class="group">&eta;<sub>eff</sub> &uarr;</th></tr>
+        <tr><th class="group">ND</th><th>FCD</th><th class="ours">VRCD</th><th class="group">ND</th><th>FCD</th><th class="ours">VRCD</th><th class="group">ND</th><th>FCD</th><th class="ours">VRCD</th></tr>
+      </thead>
+      <tbody>
+      <tr><td>Inverted Pendulum <span class="dim">(2, 1)</span></td><td class="group">100.00</td><td class="best">0.00<span class="sd">±0.00</span></td><td class="ours best">0.00<span class="sd">±0.00</span></td><td class="group best">0.00<span class="sd">±0.00</span></td><td>15.96<span class="sd">±0.53</span></td><td class="ours">1.11<span class="sd">±0.30</span></td><td class="group">0.00<span class="sd">±0.00</span></td><td>0.08<span class="sd">±0.00</span></td><td class="ours best">0.22<span class="sd">±0.00</span></td></tr>
+      <tr><td>1D Double Integrator <span class="dim">(2, 1)</span></td><td class="group best">0.00<span class="sd">±0.00</span></td><td class="best">0.00<span class="sd">±0.00</span></td><td class="ours best">0.00<span class="sd">±0.00</span></td><td class="group best">0.95<span class="sd">±0.56</span></td><td>4.01<span class="sd">±0.42</span></td><td class="ours">1.18<span class="sd">±0.31</span></td><td class="group best">0.41<span class="sd">±0.00</span></td><td>0.39<span class="sd">±0.00</span></td><td class="ours best">0.41<span class="sd">±0.00</span></td></tr>
+      <tr><td>2D Vertical Drone <span class="dim">(2, 1)</span></td><td class="group">36.80<span class="sd">±5.39</span></td><td>&mdash;</td><td class="ours best">0.00<span class="sd">±0.00</span></td><td class="group">4.73<span class="sd">±6.81</span></td><td>4.72<span class="sd">±6.81</span></td><td class="ours best">1.88<span class="sd">±0.46</span></td><td class="group">0.35<span class="sd">±0.20</span></td><td>0.00<span class="sd">±0.00</span></td><td class="ours best">0.58<span class="sd">±0.01</span></td></tr>
+      <tr><td>Dubins Car <span class="dim">(3, 1)</span></td><td class="group">0.06<span class="sd">±0.04</span></td><td class="best">0.01<span class="sd">±0.01</span></td><td class="ours">0.04<span class="sd">±0.01</span></td><td class="group">4.75<span class="sd">±1.28</span></td><td>4.33<span class="sd">±0.31</span></td><td class="ours best">2.25<span class="sd">±0.28</span></td><td class="group">0.92<span class="sd">±0.00</span></td><td>0.92<span class="sd">±0.00</span></td><td class="ours best">0.93<span class="sd">±0.00</span></td></tr>
+      <tr><td>2D Double Integrator <span class="dim">(4, 2)</span></td><td class="group">0.03<span class="sd">±0.01</span></td><td class="best">0.00<span class="sd">±0.00</span></td><td class="ours">0.03<span class="sd">±0.01</span></td><td class="group">4.68<span class="sd">±0.25</span></td><td>6.84<span class="sd">±0.30</span></td><td class="ours best">3.42<span class="sd">±0.22</span></td><td class="group best">0.93<span class="sd">±0.00</span></td><td>0.92<span class="sd">±0.00</span></td><td class="ours best">0.93<span class="sd">±0.00</span></td></tr>
+      <tr><td>Kinematic Bicycle <span class="dim">(4, 2)</span></td><td class="group">4.68<span class="sd">±0.91</span></td><td class="best">0.52<span class="sd">±0.38</span></td><td class="ours">1.16<span class="sd">±0.51</span></td><td class="group">15.49<span class="sd">±1.07</span></td><td class="best">3.16<span class="sd">±0.24</span></td><td class="ours">5.03<span class="sd">±0.15</span></td><td class="group">0.86<span class="sd">±0.01</span></td><td class="best">0.91<span class="sd">±0.00</span></td><td class="ours best">0.91<span class="sd">±0.00</span></td></tr>
+      <tr><td>Cart-Pole <span class="dim">(4, 1)</span></td><td class="group">88.14<span class="sd">±8.15</span></td><td>&mdash;</td><td class="ours best">0.16<span class="sd">±0.19</span></td><td class="group best">0.65<span class="sd">±0.48</span></td><td>4.06<span class="sd">±2.46</span></td><td class="ours">2.64<span class="sd">±0.34</span></td><td class="group">0.06<span class="sd">±0.04</span></td><td>0.00<span class="sd">±0.00</span></td><td class="ours best">0.32<span class="sd">±0.00</span></td></tr>
+      <tr><td>Dynamic Unicycle <span class="dim">(5, 2)</span></td><td class="group">4.17<span class="sd">±0.89</span></td><td class="best">0.09<span class="sd">±0.09</span></td><td class="ours">0.23<span class="sd">±0.26</span></td><td class="group best">2.93<span class="sd">±0.38</span></td><td>5.50<span class="sd">±0.42</span></td><td class="ours">6.49<span class="sd">±0.44</span></td><td class="group">0.90<span class="sd">±0.01</span></td><td class="best">0.93<span class="sd">±0.00</span></td><td class="ours best">0.93<span class="sd">±0.00</span></td></tr>
+      <tr><td>Relative Unicycle <span class="dim">(5, 2)</span></td><td class="group">6.06<span class="sd">±0.10</span></td><td>0.26<span class="sd">±0.51</span></td><td class="ours best">0.16<span class="sd">±0.02</span></td><td class="group">4.49<span class="sd">±0.33</span></td><td>37.07<span class="sd">±3.49</span></td><td class="ours best">2.35<span class="sd">±0.13</span></td><td class="group">0.87<span class="sd">±0.00</span></td><td>0.87<span class="sd">±0.01</span></td><td class="ours best">0.93<span class="sd">±0.00</span></td></tr>
+      <tr><td>3D Double Integrator <span class="dim">(6, 3)</span></td><td class="group">0.01<span class="sd">±0.00</span></td><td class="best">0.00<span class="sd">±0.00</span></td><td class="ours best">0.00<span class="sd">±0.00</span></td><td class="group best">9.12<span class="sd">±0.37</span></td><td>11.20<span class="sd">±0.43</span></td><td class="ours">10.60<span class="sd">±0.27</span></td><td class="group best">0.97<span class="sd">±0.00</span></td><td class="best">0.97<span class="sd">±0.00</span></td><td class="ours best">0.97<span class="sd">±0.00</span></td></tr>
+      <tr><td>3-DOF Manipulator <span class="dim">(6, 3)</span></td><td class="group">13.52<span class="sd">±12.09</span></td><td>0.55<span class="sd">±0.36</span></td><td class="ours best">0.43<span class="sd">±0.49</span></td><td class="group best">3.69<span class="sd">±0.78</span></td><td>6.74<span class="sd">±0.16</span></td><td class="ours">5.68<span class="sd">±0.12</span></td><td class="group">0.58<span class="sd">±0.08</span></td><td>0.65<span class="sd">±0.00</span></td><td class="ours best">0.66<span class="sd">±0.00</span></td></tr>
+      <tr><td>Landing Rocket <span class="dim">(7, 2)</span></td><td class="group">76.45<span class="sd">±14.68</span></td><td>56.41<span class="sd">±13.54</span></td><td class="ours best">1.17<span class="sd">±0.78</span></td><td class="group best">0.13<span class="sd">±0.07</span></td><td>2.95<span class="sd">±0.91</span></td><td class="ours">5.95<span class="sd">±0.20</span></td><td class="group">0.09<span class="sd">±0.06</span></td><td>0.02<span class="sd">±0.01</span></td><td class="ours best">0.24<span class="sd">±0.00</span></td></tr>
+      <tr><td>Quadruped Trunk <span class="dim">(9, 4)</span></td><td class="group">99.98<span class="sd">±0.05</span></td><td>&mdash;</td><td class="ours best">0.07<span class="sd">±0.09</span></td><td class="group best">0.00<span class="sd">±0.00</span></td><td class="best">0.00<span class="sd">±0.00</span></td><td class="ours">3.14<span class="sd">±0.11</span></td><td class="group">0.00<span class="sd">±0.00</span></td><td>0.00<span class="sd">±0.00</span></td><td class="ours best">0.07<span class="sd">±0.00</span></td></tr>
+      <tr><td>6-DoF Underw. Vehicle <span class="dim">(12, 6)</span></td><td class="group">22.24<span class="sd">±0.93</span></td><td class="best">0.61<span class="sd">±0.07</span></td><td class="ours">1.00<span class="sd">±0.25</span></td><td class="group best">0.80<span class="sd">±0.14</span></td><td>5.15<span class="sd">±0.06</span></td><td class="ours">2.27<span class="sd">±0.09</span></td><td class="group">0.33<span class="sd">±0.00</span></td><td>0.34<span class="sd">±0.00</span></td><td class="ours best">0.36<span class="sd">±0.00</span></td></tr>
+      <tr><td>Quadrotor <span class="dim">(13, 4)</span></td><td class="group">5.75<span class="sd">±0.20</span></td><td>1.21<span class="sd">±0.08</span></td><td class="ours best">1.07<span class="sd">±0.12</span></td><td class="group">11.18<span class="sd">±0.35</span></td><td class="best">9.50<span class="sd">±0.42</span></td><td class="ours">10.10<span class="sd">±0.42</span></td><td class="group">0.88<span class="sd">±0.00</span></td><td class="best">0.91<span class="sd">±0.00</span></td><td class="ours best">0.91<span class="sd">±0.00</span></td></tr>
+      </tbody>    </table>
+    </div>
+    <p class="tnote"><b>CBF validation results</b>, mean ± standard deviation over five seeds.
+        ND = PDE loss only, FCD = full-control (MPPI) supervision, <b>VRCD = vertex-restricted
+        supervision (ours)</b>. Best value per metric in bold. A dash marks systems whose
+        predicted safe set is empty for every seed; a missing standard deviation means
+        &rho;<sub>FS</sub> is defined for a single seed only.</p>
+
+    <h3>Comparison with the ground truth</h3>
+    <p>For the seven systems with at most four states, a reference value function can be computed
+      on a state-space grid. VertexCBF reaches the highest intersection over union on five of
+      them and stays within 0.3 percentage points of the best value on the other two.</p>
+
+    <div class="scroller">
+    <table>
+      <thead>
+        <tr><th>System</th><th>ND</th><th>FCD</th><th class="ours">VRCD (ours)</th></tr>
+      </thead>
+      <tbody>
+      <tr><td>Inverted Pendulum</td><td>1.54<span class="sd">±3.07</span></td><td>33.53<span class="sd">±0.61</span></td><td class="ours best">96.39<span class="sd">±1.16</span></td></tr>
+      <tr><td>1D Double Integrator</td><td class="best">98.37<span class="sd">±0.72</span></td><td>94.02<span class="sd">±0.43</span></td><td class="ours">98.10<span class="sd">±0.35</span></td></tr>
+      <tr><td>2D Vertical Drone</td><td>64.09<span class="sd">±32.05</span></td><td>0.00<span class="sd">±0.00</span></td><td class="ours best">98.48<span class="sd">±0.20</span></td></tr>
+      <tr><td>Dubins Car</td><td>99.56<span class="sd">±0.15</span></td><td>99.66<span class="sd">±0.04</span></td><td class="ours best">99.80<span class="sd">±0.03</span></td></tr>
+      <tr><td>2D Double Integrator</td><td>99.52<span class="sd">±0.03</span></td><td>99.39<span class="sd">±0.02</span></td><td class="ours best">99.64<span class="sd">±0.02</span></td></tr>
+      <tr><td>Kinematic Bicycle</td><td>97.71<span class="sd">±0.24</span></td><td class="best">99.65<span class="sd">±0.00</span></td><td class="ours">99.59<span class="sd">±0.00</span></td></tr>
+      <tr><td>Cart-Pole</td><td>65.07<span class="sd">±0.22</span></td><td>0.00<span class="sd">±0.00</span></td><td class="ours best">93.38<span class="sd">±0.35</span></td></tr>
+      </tbody>    </table>
+    </div>
+    <p class="tnote"><b>Intersection over union (%)</b> between the predicted and the ground-truth safe
+        set, on the reference grid of every system for which one is available. Mean ± standard
+        deviation over five seeds.</p>
+
+    <h3>All fifteen systems</h3>
+    <figure>
+      <a href="assets/img/systems-grid.png"><img src="assets/img/systems-grid.png"
+         alt="Two-dimensional slices of the learned neural CBF for all fifteen systems"></a>
+      <figcaption>Two-dimensional slices of the neural CBFs learned with VertexCBF, from a 2-state
+        inverted pendulum to a 13-state quadrotor. Dashed blue is the predicted safe set, dash-dotted
+        green the set validated by closed-loop rollouts, and yellow the ground truth where a grid
+        solution is available.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ hardware -->
+<section id="hardware">
+  <div class="wrap">
+    <h2>Hardware experiment</h2>
+    <p>A mobile delivery robot navigates from a start to a goal position while pedestrians
+      deliberately intercept its path. An MPC planner provides the nominal control, and a CBF-QP
+      filter — using the learned relative-unicycle CBF together with live pedestrian tracks —
+      modifies it to stay safe. All perception, localisation and optimisation run on the onboard
+      computer. The robot <strong>avoided a collision in all 10 trials</strong>.</p>
+
+    <figure>
+      <a href="assets/img/hardware-plots.png"><img src="assets/img/hardware-plots.png"
+         alt="Robot and tracked pedestrians, CBF value and control signals"></a>
+      <figcaption>A representative trial: the robot's path and the tracked pedestrians (left),
+        and the CBF value together with nominal and filtered controls (right). The CBF constraint
+        is relaxed by a slack variable, so the QP stays feasible; the brief small negative values
+        come from the mismatch between the ideal unicycle used for training and the real
+        skid-steer platform, and are absorbed by the inflated radii used during training.</figcaption>
+    </figure>
+
+    <figure>
+      <a href="assets/img/hardware-screen.png"><img src="assets/img/hardware-screen.png"
+         alt="Screenshot from the robot's onboard computer"></a>
+      <figcaption>The robot's onboard view: front camera, a 2-D slice of the neural CBF in
+        positional coordinates, and the perception module's tracks.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================== poster -->
+<section id="poster">
+  <div class="wrap">
+    <h2>Poster</h2>
+    <div class="poster-card">
+      <figure>
+        <a href="assets/poster/vertexcbf-corl2026-poster.pdf"><img src="assets/poster/preview.jpg"
+           alt="VertexCBF conference poster"></a>
+      </figure>
+      <div>
+        <p>The CoRL 2026 poster, in A0 landscape.</p>
+        <div class="actions">
+          <a class="btn primary" href="assets/poster/vertexcbf-corl2026-poster.pdf">Download PDF</a>
+          <a class="btn" href="poster/poster.html">View in browser</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ code -->
+<section id="code">
+  <div class="wrap">
+    <h2>Code</h2>
+    <p>The <a href="https://github.com/bojan-derajic/vertexcbf">reference implementation</a> ships
+      the library, YAML configs for all 15 systems of the paper, training and evaluation scripts,
+      and two tutorial notebooks. The full-control sampling-based baselines (MPPI, CEM, iCEM,
+      random shooting) are included for comparison. A CUDA GPU is strongly recommended for
+      training.</p>
+
+<pre><code>git clone https://github.com/bojan-derajic/vertexcbf.git
+cd vertexcbf
+pip install -e .
+
+# generate labels, train and validate a CBF for one system
+python scripts/train.py --config configs/inverted_pendulum.yaml
+
+# plot a 2-D slice of the learned CBF
+python scripts/evaluate.py --config configs/inverted_pendulum.yaml \
+    --checkpoint checkpoints/VRC_DATA/inverted_pendulum/final.pt</code></pre>
+
+    <p>Supervision labels are selected in the <code>data</code> section of the config:
+      <code>beam_search</code>, <code>stochastic_beam_search</code> and
+      <code>branch_and_bound</code> search the control vertices, while <code>mppi</code>,
+      <code>cem</code>, <code>icem</code> and <code>random_shooting</code> reproduce the
+      full-control baselines. Copy <code>configs/template.yaml</code> to add your own system.</p>
+  </div>
+</section>
+
+<!-- ================================================================ cite -->
+<section id="cite">
+  <div class="wrap">
+    <h2>Citation</h2>
+    <div class="cite">
+      <button type="button" id="copy-bib">Copy</button>
+<pre id="bibtex"><code>@inproceedings{derajic2026vertexcbf,
+  title     = {{VertexCBF}: Improving Neural Control Barrier Functions
+               via Vertex-Restricted Control Search},
+  author    = {Deraji{\'c}, Bojan and Bernhard, Sebastian and H{\"o}nig, Wolfgang},
+  booktitle = {Conference on Robot Learning (CoRL)},
+  year      = {2026}
+}</code></pre>
+    </div>
+    <p>Questions and issues are welcome at
+      <a href="https://github.com/bojan-derajic/vertexcbf/issues">github.com/bojan-derajic/vertexcbf/issues</a>,
+      or by email to <a href="mailto:bojan.derajic@campus.tu-berlin.de">bojan.derajic@campus.tu-berlin.de</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="badges">
+      <img class="l-tub"  src="assets/logo/tu-berlin.png" alt="Technische Universität Berlin">
+      <img class="l-imrc" src="assets/logo/imrc.svg"      alt="IMRC Lab">
+      <img class="l-corl" src="assets/logo/corl.png"      alt="CoRL 2026">
+    </div>
+    <p>This research was supported by the German Federal Ministry for Economic Affairs and Energy
+       within the project “NXT GEN AI METHODS — Generative Methoden für Perzeption, Prädiktion und
+       Planung”.</p>
+    <p>© 2026 the authors. This page is built from static HTML with self-hosted
+       <a href="https://rsms.me/inter/">Inter</a> (SIL OFL 1.1) and
+       <a href="https://katex.org">KaTeX</a> (MIT).</p>
+  </div>
+</footer>
+
+<script src="assets/katex/katex.min.js"></script>
+<script src="assets/katex/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "\\[", right: "\\]", display: true},
+      {left: "\\(", right: "\\)", display: false}
+    ],
+    throwOnError: false
+  });
+  document.documentElement.dataset.mathReady = "1";
+
+  document.getElementById("copy-bib").addEventListener("click", function () {
+    var btn = this;
+    navigator.clipboard.writeText(document.getElementById("bibtex").innerText).then(function () {
+      btn.textContent = "Copied";
+      setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VertexCBF — CoRL 2026 poster</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/css/poster.css">
+</head>
+<body>
+
+<!-- =========================================================== header -->
+<div class="top">
+<header class="masthead">
+  <div class="id">
+    <h1><span class="lead">VertexCBF:</span> Improving Neural Control Barrier Functions
+        via <span class="nb">Vertex-Restricted</span> Control Search</h1>
+    <p class="authors">Bojan Derajić<sup>1</sup> &nbsp;·&nbsp;
+       Sebastian Bernhard<sup>2</sup> &nbsp;·&nbsp;
+       Wolfgang Hönig<sup>1,3</sup></p>
+    <p class="affil"><sup>1</sup>Technical University of Berlin &nbsp;&nbsp;
+       <sup>2</sup>Technical University of Applied Sciences Augsburg &nbsp;&nbsp;
+       <sup>3</sup>Robotics Institute Germany</p>
+  </div>
+
+  <div class="meta">
+    <div class="logos">
+      <img src="../assets/logo/tu-berlin.png" alt="Technische Universität Berlin">
+      <img src="../assets/logo/imrc.svg"      alt="IMRC Lab">
+      <img src="../assets/logo/corl.png"      alt="CoRL">
+    </div>
+    <div class="links">
+      <div class="url">
+        <b>arxiv.org/abs/2609.12831</b><br>
+        bojan-derajic.github.io/vertexcbf-page
+      </div>
+      <figure class="qr">
+        <img src="../assets/img/qr-paper.svg" alt="">
+        <figcaption>Paper</figcaption>
+      </figure>
+      <figure class="qr">
+        <img src="../assets/img/qr-project.svg" alt="">
+        <figcaption>Code &amp; page</figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<p class="tagline">We train neural CBFs with labels from a GPU-parallel search over the
+  <b>vertices of the input polytope</b>. The learned CBFs recover large, validated safe sets
+  on <b>15 systems</b> and run in real time on a mobile robot.</p>
+</div>
+
+<main class="board">
+
+<!-- ========================================================== column 1 -->
+<div class="col">
+
+  <section class="block">
+    <h2><span class="n">01</span>Motivation</h2>
+    <p>A <strong>CBF-QP safety filter</strong> keeps a robot inside the constraint set
+       <span class="ix">\(\mathcal C = \{x : c(x)\ge 0\}\)</span> by modifying a nominal
+       control input:</p>
+    <div class="math">\[ \begin{aligned}
+       u^{*} = \operatorname*{arg\,min}_{u\,\in\,\mathcal U}\ \ &
+       \tfrac12\lVert u - u_{\mathrm{nom}}\rVert^2 \\[-1pt]
+       \text{s.t.}\ \ & L_f h(x) + L_g h(x)\,u + \alpha\bigl(h(x)\bigr) \ge 0
+       \end{aligned} \]</div>
+    <ul>
+      <li>Under <strong>input limits</strong>, valid CBFs are hard to design and often
+          <strong>overly conservative</strong>.</li>
+      <li><strong>Grid-based HJ reachability</strong> is exact but scales
+          <strong>exponentially</strong> with the state dimension.</li>
+      <li><strong>PDE-only neural CBFs</strong> tend to converge to
+          <strong>trivial solutions</strong>.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2><span class="n">02</span>The maximal safe set</h2>
+    <p>For dynamics <span class="ix">\(\dot x = \phi(x,u) = f(x) + g(x)u\)</span> with a
+       convex input polytope <span class="ix">\(\mathcal U\)</span>, the HJ safety value function</p>
+    <div class="math">\[ V(x) = \sup_{u(\cdot)\in\,\mathcal U}\ \inf_{t\ \ge\ 0}\ c\bigl(x(t)\bigr) \]</div>
+    <p>defines the <strong>maximal safe set</strong>
+       <span class="ix">\(\mathcal S = \{x : V(x) \ge 0\}\)</span>, the largest controlled
+       invariant subset of <span class="ix">\(\mathcal C\)</span>.</p>
+    <span class="arrow">We learn a neural CBF <span class="ix">\(V_\Theta\)</span> whose safe
+       set approximates <span class="ix">\(\mathcal S\)</span>.</span>
+  </section>
+
+  <section class="block grow">
+    <h2><span class="n">03</span>Neural CBF from the HJB equation</h2>
+    <p><span class="ix">\(V_\Theta\)</span> is trained on the <strong>stationary HJB
+       variational inequality</strong>. The Hamiltonian is linear in
+       <span class="ix">\(u\)</span>, so its maximum is attained at a vertex of
+       <span class="ix">\(\mathcal U\)</span>:</p>
+    <div class="math">\[ \min\Bigl\{\, c(x) - V(x),\ \ \max_{u\,\in\,\mathcal V}
+       \nabla V(x)^\top\!\phi(x,u) \,\Bigr\} = 0 \]</div>
+    <figure class="small">
+      <img src="../assets/img/vertex-max-poster.svg" alt="">
+      <figcaption>A linear objective over <span class="ix">\(\mathcal U\)</span> is maximized
+        at a vertex.</figcaption>
+    </figure>
+  </section>
+
+</div>
+
+<!-- ========================================================== column 2 -->
+<div class="col">
+
+  <section class="block">
+    <h2><span class="n">04</span>Network and training</h2>
+    <p>The network is a <strong>non-negative residual</strong> of the constraint:</p>
+    <div class="math">\[ V_\Theta(x) = c(x) - r_\Theta(x), \qquad r_\Theta(x) \ge 0 \]</div>
+    <span class="arrow">The learned safe set always lies inside
+       <span class="ix">\(\mathcal C\)</span>.</span>
+    <p class="sub">Training objective:</p>
+    <div class="math">\[ \mathcal L(\Theta) = \lambda\,\mathcal L_{\mathrm{PDE}}(\Theta)
+       + (1-\lambda)\,\mathcal L_{\mathrm{data}}(\Theta) \]</div>
+    <ul>
+      <li><span class="ix">\(\mathcal L_{\mathrm{PDE}}\)</span>: HJB residual on unlabelled
+          states</li>
+      <li><span class="ix">\(\mathcal L_{\mathrm{data}}\)</span>: regression on
+          vertex-search labels</li>
+    </ul>
+  </section>
+
+  <section class="block grow">
+    <h2><span class="n">05</span>Vertex-restricted control search</h2>
+    <p>Labels come from a finite-horizon search over sequences of vertex controls:</p>
+    <div class="math">\[ V^{K}_{\Delta t}(x) = \max_{u_0,\dots,u_{K-1}\,\in\,\mathcal V}\ \
+       \min_{0\,\le\, k\,\le\, K}\ c(x_k) \]</div>
+    <img class="diagram" src="../assets/img/tree-search.svg" alt="">
+    <ul>
+      <li><strong>Beam search</strong> keeps the best <span class="ix">\(B\)</span> partial
+          trajectories at each of the <span class="ix">\(K\)</span> steps.</li>
+      <li><strong>GPU-parallel</strong> over states, beams and vertices; no PDE solver
+          is needed.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2><span class="n">06</span>Evaluation metrics</h2>
+    <p>Predictions are checked with closed-loop rollouts:</p>
+    <ul>
+      <li><span class="ix">\(\rho_{\mathrm{FS}}\)</span> <strong>false-safe</strong>:
+          predicted safe, but the rollout leaves <span class="ix">\(\mathcal C\)</span></li>
+      <li><span class="ix">\(\rho_{\mathrm{FU}}\)</span> <strong>false-unsafe</strong>:
+          predicted unsafe, but the rollout stays safe</li>
+      <li><span class="ix">\(\eta_{\mathrm{eff}}\)</span> <strong>effective safe
+          volume</strong>: share of states predicted and validated safe</li>
+    </ul>
+  </section>
+
+</div>
+
+<!-- ========================================================== column 3 -->
+<div class="col">
+
+  <section class="block">
+    <h2><span class="n">07</span>Better supervision data</h2>
+    <figure>
+      <img src="../assets/img/trajectories-ip.png" alt="">
+      <figcaption>Rollouts from 160 initial states: <b>full-control MPPI</b> (left) stays safe
+        from only a few, <b>vertex beam search</b> (right) from all states of the safe set.</figcaption>
+    </figure>
+  </section>
+
+  <section class="block">
+    <h2><span class="n">08</span>Recovering the maximal safe set</h2>
+    <figure>
+      <img src="../assets/img/compare-ip.png" alt="">
+      <figcaption>Inverted pendulum: <b>PDE-only</b> gives an empty safe set, <b>full-control
+        data</b> a conservative one, and <b>vertex data</b> (ours) the ground truth.</figcaption>
+    </figure>
+  </section>
+
+  <section class="block grow">
+    <h2><span class="n">09</span>Results on 15 systems</h2>
+    <div class="chart">
+      <div class="legend">
+        <span><i style="background:var(--bar-nd)"></i>PDE-only</span>
+        <span><i style="background:var(--bar-fcd)"></i>Full-control data</span>
+        <span><i style="background:var(--bar-ours)"></i><strong>VertexCBF</strong></span>
+      </div>
+      <div class="rows">
+          <div class="row">
+            <div class="name">Inverted Pendulum <i>(2,1)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.00"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.08"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.22"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.22</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">1D Double Integrator <i>(2,1)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.41"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.39"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.41"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.41</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">2D Vertical Drone <i>(2,1)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.35"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.00"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.58"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.58</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Dubins Car <i>(3,1)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.92"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.92"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.93"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.93</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">2D Double Integrator <i>(4,2)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.93"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.92"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.93"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.93</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Kinematic Bicycle <i>(4,2)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.86"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.91"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.91"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.91</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Cart-Pole <i>(4,1)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.06"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.00"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.32"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.32</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Dynamic Unicycle <i>(5,2)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.90"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.93"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.93"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.93</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Relative Unicycle <i>(5,2)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.87"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.87"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.93"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.93</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">3D Double Integrator <i>(6,3)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.97"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.97"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.97"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.97</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">3-DoF Manipulator <i>(6,3)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.58"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.65"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.66"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.66</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Landing Rocket <i>(7,2)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.09"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.02"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.24"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.24</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Quadruped Trunk <i>(9,4)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.00"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.00"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.07"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.07</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">6-DoF AUV <i>(12,6)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.33"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.34"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.36"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.36</span></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">Quadrotor <i>(13,4)</i></div>
+            <div class="bars">
+              <div class="bar" style="--v:0.88"><span class="fill" style="background:var(--bar-nd)"></span></div>
+              <div class="bar" style="--v:0.91"><span class="fill" style="background:var(--bar-fcd)"></span></div>
+              <div class="bar" style="--v:0.91"><span class="fill" style="background:var(--bar-ours)"></span><span class="val">0.91</span></div>
+            </div>
+          </div>
+      </div>
+      <div class="axis"><span></span><div class="ticks"><span>0</span><span>0.5</span><span>1.0</span></div></div>
+      <p class="note">Effective safe volume <span class="ix">\(\eta_{\mathrm{eff}}\)</span>
+        (mean of five seeds); (state, input) dimensions in brackets.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ========================================================== column 4 -->
+<div class="col">
+
+  <section class="block stats">
+    <div class="stat">
+      <div class="v">15/15</div>
+      <div class="k">systems with the highest or tied-highest effective safe volume</div>
+    </div>
+    <div class="stat">
+      <div class="v">≤ 1.2<small> %</small></div>
+      <div class="k">false-safe rate on every system; baselines exceed 20&nbsp;% or return an
+        empty safe set on five</div>
+    </div>
+    <div class="stat">
+      <div class="v">96.4<small> %</small></div>
+      <div class="k">IoU with the true safe set on the inverted pendulum, vs. 33.5&nbsp;% and
+        1.5&nbsp;% for the baselines</div>
+    </div>
+  </section>
+
+  <section class="block grow hardware">
+    <h2><span class="n">10</span>Hardware experiments</h2>
+    <ul>
+      <li>A mobile robot follows an MPC planner, and the learned CBF filters its controls in
+          real time using live pedestrian detections.</li>
+      <li>One or two pedestrians cross the robot's path in each trial;
+          <strong>all 10 trials were collision-free</strong>.</li>
+    </ul>
+    <div class="hw">
+      <figure>
+        <img src="../assets/img/hardware-plots.png" alt="">
+        <figcaption>One trial: robot and pedestrian paths (left); CBF value and nominal vs.
+          filtered controls (right).</figcaption>
+      </figure>
+      <figure>
+        <img src="../assets/img/hardware-screen.png" alt="">
+        <figcaption>Onboard view: front camera, a 2-D slice of the learned CBF, and the
+          robot's perception.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="n">11</span>Conclusion</h2>
+    <ul>
+      <li>Searching only over the vertices of <span class="ix">\(\mathcal U\)</span> provides
+          effective supervision without a PDE solver.</li>
+      <li>Limitations: no formal guarantees yet; the search cost grows with
+          <span class="ix">\(|\mathcal V|\)</span> and <span class="ix">\(K\)</span>.</li>
+      <li>Future work: error guarantees, systems with many control vertices, and uncertain
+          dynamics.</li>
+    </ul>
+  </section>
+
+</div>
+</main>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/katex/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "\\[", right: "\\]", display: true},
+      {left: "\\(", right: "\\)", display: false}
+    ],
+    throwOnError: false
+  });
+  document.documentElement.dataset.mathReady = "1";
+</script>
+</body>
+</html>

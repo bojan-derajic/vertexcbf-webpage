@@ -1,0 +1,347 @@
+/* ===========================================================================
+   VertexCBF — CoRL 2026 poster, A0 landscape (1189 x 841 mm).
+   Layout is authored in physical units (mm / pt) so that the HTML page and
+   the printed PDF are identical.  Build:  python tools/build_poster.py
+
+   Board:  four columns of white cards on a tinted ground.  Columns 1-2 carry
+           the method (text), columns 3-4 the results; the two result columns
+           are wider so that all paper figures share one width.
+   =========================================================================== */
+
+@import url('../fonts/inter.css');
+
+:root {
+  --ink:        #15181E;
+  --body:       #353B46;
+  --muted:      #6B7383;
+  --rule:       #D5DAE2;
+  --surface:    #F4F6FA;
+  --ground:     #E9EEF5;
+  --card-line:  #D9E0EA;
+  --accent:     #14467E;
+  --accent-sft: #E8EEF6;
+  --zebra:      #E6EBF3;      /* chart row shading; bars below checked >= 2:1 on it */
+  --bar-nd:     #9EA7B6;
+  --bar-fcd:    #66738A;
+  --bar-ours:   #14467E;
+
+  --pad:        24mm;
+  --gap:        10mm;
+  --text-col:   245mm;      /* columns 1-2; columns 3-4 share the rest */
+}
+
+@page { size: 1189mm 841mm; margin: 0; }
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; background: var(--ground); }
+
+body {
+  width: 1189mm;
+  height: 841mm;
+  padding: 0 var(--pad) var(--pad);
+  font-family: 'Inter', 'Liberation Sans', system-ui, sans-serif;
+  font-size: 26.5pt;
+  line-height: 1.36;
+  color: var(--body);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------- header */
+
+/* white band across the full poster width: title, logos, QR codes, tagline */
+.top {
+  margin: 0 calc(-1 * var(--pad));
+  padding: var(--pad) var(--pad) 8mm;
+  background: #fff;
+  border-bottom: 1.1mm solid var(--accent);
+}
+
+.masthead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16mm;
+  align-items: start;
+}
+
+h1 {
+  margin: 0;
+  font-size: 76pt;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+}
+h1 .lead { color: var(--accent); }
+h1 .nb { white-space: nowrap; }
+
+.authors {
+  margin: 7mm 0 0;
+  font-size: 30pt;
+  font-weight: 600;
+  color: var(--ink);
+}
+.authors sup { font-weight: 500; color: var(--accent); font-size: 0.7em; }
+
+.affil { margin: 2mm 0 0; font-size: 21pt; color: var(--muted); }
+.affil sup { color: var(--accent); font-weight: 600; }
+
+.meta { display: flex; flex-direction: column; align-items: flex-end; gap: 9mm; }
+
+/* all three logo files are cropped to their artwork, so one height matches them */
+.logos { display: flex; align-items: center; gap: 16mm; }
+.logos img { display: block; height: 32mm; }
+
+.links { display: flex; align-items: flex-end; gap: 11mm; }
+.links .url {
+  text-align: right;
+  font-size: 20pt;
+  line-height: 1.45;
+  color: var(--muted);
+  padding-bottom: 7mm;
+}
+.links .url b { color: var(--ink); font-weight: 700; }
+.qr { margin: 0; text-align: center; }
+.qr img { width: 51mm; height: 51mm; display: block; }
+.qr figcaption {
+  margin-top: 2mm;
+  font-size: 18pt;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+}
+
+.tagline {
+  margin: 7mm 0 0;
+  background: var(--accent-sft);
+  border-left: 1.6mm solid var(--accent);
+  padding: 5mm 7mm;
+  font-size: 30pt;
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--ink);
+}
+.tagline b { font-weight: 700; color: var(--accent); }
+
+/* ----------------------------------------------------------------- board */
+
+.board {
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--gap);
+  display: grid;
+  grid-template-columns: var(--text-col) var(--text-col) 1fr 1fr;
+  gap: var(--gap);
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ----------------------------------------------------------------- cards */
+
+.block {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 0.35mm solid var(--card-line);
+  border-radius: 3mm;
+  padding: 6mm 7mm 7mm;
+}
+/* the card that takes up whatever height its column has left */
+.block.grow { flex: 1 1 auto; }
+
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 4mm;
+  margin: 0 0 4.5mm;
+  font-size: 33pt;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+h2 .n {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15mm;
+  height: 12.5mm;
+  border-radius: 2mm;
+  background: var(--accent);
+  color: #fff;
+  font-size: 23pt;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+p { margin: 0 0 3mm; }
+p:last-child { margin-bottom: 0; }
+
+ul { margin: 0; padding: 0; list-style: none; }
+li { position: relative; padding-left: 7mm; margin-bottom: 2.6mm; }
+li:last-child { margin-bottom: 0; }
+li::before {
+  content: "";
+  position: absolute;
+  left: 1mm; top: 3.3mm;
+  width: 2.2mm; height: 2.2mm;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+strong { color: var(--ink); font-weight: 700; }
+
+/* ------------------------------------------------------------------ math */
+
+.math {
+  margin: 3.5mm 0;
+  padding: 3mm 2mm;
+  background: var(--surface);
+  border-radius: 2mm;
+  text-align: center;
+}
+.math:last-child { margin-bottom: 0; }
+.katex { font-size: 1.04em; }
+.katex-display { margin: 0; }
+
+.note { font-size: 20.5pt; color: var(--muted); }
+
+.arrow {
+  display: block;
+  margin: 3.5mm 0 0;
+  font-size: 26pt;
+  font-weight: 600;
+  color: var(--ink);
+}
+.arrow::before { content: "→  "; color: var(--accent); font-weight: 700; }
+
+.sub { margin: 5mm 0 0; padding-top: 4mm; border-top: 0.35mm solid var(--rule); }
+
+/* --------------------------------------------------------------- figures */
+
+figure { margin: 0; }
+figure img { width: 100%; display: block; }
+figure.small { width: 76%; margin: 2mm auto 0; }
+figure.small figcaption { text-align: center; }
+.diagram { width: 100%; display: block; margin: 3mm auto 6mm; }
+/* in a stretched card, a picture sits centred in the height left over */
+.grow > .diagram, .grow > figure.small { margin-top: auto; margin-bottom: auto;
+                                         padding: 3mm 0 6mm; }
+
+figcaption {
+  margin-top: 2.4mm;
+  font-size: 20.5pt;
+  line-height: 1.3;
+  color: var(--muted);
+}
+figcaption b { color: var(--ink); font-weight: 600; }
+
+/* ------------------------------------------------------------- hardware */
+
+.hardware ul { margin-bottom: 5mm; }
+.hardware .hw {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 5mm;
+}
+
+/* ----------------------------------------------------------- key results */
+
+.stats {
+  background: var(--accent-sft);
+  border-color: var(--accent-sft);
+  gap: 4mm;
+}
+.stat {
+  display: grid;
+  grid-template-columns: 64mm 1fr;
+  align-items: center;
+  gap: 5mm;
+}
+.stat + .stat { padding-top: 4mm; border-top: 0.35mm solid #C9D5E5; }
+.stat .v {
+  font-size: 44pt;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.stat .v small { font-size: 0.55em; font-weight: 700; letter-spacing: 0; }
+.stat .k { font-size: 22pt; line-height: 1.28; }
+
+/* ------------------------------------------------------------- bar chart */
+
+.chart { flex: 1; display: flex; flex-direction: column; }
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 8mm;
+  font-size: 21pt;
+  color: var(--body);
+  margin-bottom: 3mm;
+}
+.legend span { display: flex; align-items: center; gap: 2mm; }
+.legend i { width: 7mm; height: 3.6mm; display: block; }
+
+/* one row per system; alternate rows are shaded so each group of bars reads as a unit */
+.rows { flex: 1; display: grid; grid-auto-rows: 1fr; }
+.row {
+  display: grid;
+  grid-template-columns: 76mm 1fr;
+  align-items: center;
+  gap: 4mm;
+  padding: 0 2mm;
+  border-radius: 1.5mm;
+}
+.row:nth-child(odd) { background: var(--zebra); }
+.row .name {
+  font-size: 17pt;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--ink);
+}
+.row .name i { font-style: normal; color: var(--muted); font-size: 0.85em; }
+.bars { display: flex; flex-direction: column; gap: 0.6mm; }
+.bar { height: 3.3mm; display: flex; align-items: center; }
+.bar .fill { height: 100%; width: calc(var(--v) * 84%); min-width: 0.4mm; }
+.bar .val {
+  font-size: 16pt;
+  margin-left: 1.8mm;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.axis {
+  display: grid;
+  grid-template-columns: 76mm 1fr;
+  gap: 4mm;
+  padding: 0 2mm;
+  margin-top: 1.5mm;
+  font-size: 17pt;
+  color: var(--muted);
+}
+.axis .ticks {
+  display: flex;
+  justify-content: space-between;
+  width: 84%;
+  border-top: 0.35mm solid var(--rule);
+  padding-top: 1mm;
+}
+.chart .note { margin-top: 2.5mm; }

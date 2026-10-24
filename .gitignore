@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# intermediate full-size screenshot written by tools/build_poster.py
+assets/poster/preview.png

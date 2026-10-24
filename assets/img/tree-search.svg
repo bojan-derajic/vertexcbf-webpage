@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 572 292" font-family="Inter, 'Liberation Sans', system-ui, sans-serif" fill="#15181E">
+<rect x="152" y="52" width="32" height="206" rx="16" fill="#E8EEF6" stroke="#14467E" stroke-width="1.6" stroke-opacity="0.45"/>
+<rect x="285" y="81" width="30" height="89" rx="15" fill="#E8EEF6" stroke="#14467E" stroke-width="1.6" stroke-opacity="0.45"/>
+<rect x="418" y="61" width="28" height="82" rx="14" fill="#E8EEF6" stroke="#14467E" stroke-width="1.6" stroke-opacity="0.45"/>
+<line x1="49" y1="155" x2="160" y2="68" stroke="#14467E" stroke-width="2.8"/>
+<line x1="176" y1="68" x2="293" y2="40" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="176" y1="68" x2="293" y2="68" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="176" y1="68" x2="293" y2="96" stroke="#14467E" stroke-width="2.8"/>
+<line x1="49" y1="155" x2="160" y2="155" stroke="#14467E" stroke-width="2.8"/>
+<line x1="176" y1="155" x2="293" y2="127" stroke="#14467E" stroke-width="2.8"/>
+<line x1="176" y1="155" x2="293" y2="155" stroke="#14467E" stroke-width="2.8"/>
+<line x1="176" y1="155" x2="293" y2="183" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="49" y1="155" x2="160" y2="242" stroke="#14467E" stroke-width="2.8"/>
+<line x1="176" y1="242" x2="293" y2="214" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="176" y1="242" x2="293" y2="242" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="176" y1="242" x2="293" y2="270" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="307" y1="96" x2="426" y2="48" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="307" y1="96" x2="426" y2="75" stroke="#14467E" stroke-width="2.8"/>
+<line x1="307" y1="96" x2="426" y2="102" stroke="#14467E" stroke-width="2.8"/>
+<line x1="307" y1="127" x2="426" y2="129" stroke="#14467E" stroke-width="2.8"/>
+<line x1="307" y1="127" x2="426" y2="156" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="307" y1="127" x2="426" y2="183" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="307" y1="155" x2="426" y2="210" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="307" y1="155" x2="426" y2="237" stroke="#D5DAE2" stroke-width="2"/>
+<line x1="307" y1="155" x2="426" y2="264" stroke="#D5DAE2" stroke-width="2"/>
+<circle cx="40" cy="155" r="9" fill="#fff" stroke="#14467E" stroke-width="2.6"/>
+<circle cx="168" cy="68" r="8" fill="#14467E"/>
+<circle cx="300" cy="40" r="7" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="300" cy="68" r="7" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="300" cy="96" r="7" fill="#14467E"/>
+<circle cx="168" cy="155" r="8" fill="#14467E"/>
+<circle cx="300" cy="127" r="7" fill="#14467E"/>
+<circle cx="300" cy="155" r="7" fill="#14467E"/>
+<circle cx="300" cy="183" r="7" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="168" cy="242" r="8" fill="#14467E"/>
+<circle cx="300" cy="214" r="7" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="300" cy="242" r="7" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="300" cy="270" r="7" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="432" cy="48" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="432" cy="75" r="6" fill="#14467E"/>
+<circle cx="432" cy="102" r="6" fill="#14467E"/>
+<circle cx="432" cy="129" r="6" fill="#14467E"/>
+<circle cx="432" cy="156" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="432" cy="183" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="432" cy="210" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="432" cy="237" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<circle cx="432" cy="264" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/>
+<text x="40" y="22" font-size="19" fill="#6B7383" text-anchor="middle">k = 0</text>
+<text x="168" y="22" font-size="19" fill="#6B7383" text-anchor="middle">1</text>
+<text x="300" y="22" font-size="19" fill="#6B7383" text-anchor="middle">2</text>
+<text x="432" y="22" font-size="19" fill="#6B7383" text-anchor="middle">3</text>
+<text x="482" y="22" font-size="19" fill="#6B7383" text-anchor="middle">…</text>
+<text x="40" y="190" font-size="20" font-style="italic" text-anchor="middle">x</text>
+<path d="M454,61 h7 V143 h-7" fill="none" stroke="#15181E" stroke-width="2.2"/>
+<text x="470" y="99.0" font-size="24"><tspan font-style="italic" font-weight="700">B</tspan> = 3</text>
+<text x="470" y="122.0" font-size="18" fill="#6B7383">beam width</text>
+<circle cx="16" cy="252" r="6" fill="#14467E"/><text x="28" y="258" font-size="18" fill="#6B7383">kept</text>
+<circle cx="16" cy="276" r="6" fill="#fff" stroke="#D5DAE2" stroke-width="2.4"/><text x="28" y="282" font-size="18" fill="#6B7383">pruned</text>
+</svg>
