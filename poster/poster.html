@@ -44,10 +44,6 @@
     </div>
   </div>
 </header>
-
-<p class="tagline">We train neural CBFs with labels from a GPU-parallel search over the
-  <b>vertices of the input polytope</b>. The learned CBFs recover large, validated safe sets
-  on <b>15 systems</b> and run in real time on a mobile robot.</p>
 </div>
 
 <main class="board">
@@ -108,8 +104,9 @@
 <div class="col">
 
   <section class="block">
-    <h2><span class="n">04</span>Network and training</h2>
-    <p>The network is a <strong>non-negative residual</strong> of the constraint:</p>
+    <h2><span class="n">04</span>Model architecture and training</h2>
+    <p><span class="ix">\(V_\Theta\)</span> is parametrized as a <strong>non-negative
+       residual</strong> subtracted from the constraint:</p>
     <div class="math">\[ V_\Theta(x) = c(x) - r_\Theta(x), \qquad r_\Theta(x) \ge 0 \]</div>
     <span class="arrow">The learned safe set always lies inside
        <span class="ix">\(\mathcal C\)</span>.</span>
@@ -127,7 +124,7 @@
   <section class="block grow">
     <h2><span class="n">05</span>Vertex-restricted control search</h2>
     <p>Labels come from a finite-horizon search over sequences of vertex controls:</p>
-    <div class="math">\[ V^{K}_{\Delta t}(x) = \max_{u_0,\dots,u_{K-1}\,\in\,\mathcal V}\ \
+    <div class="math">\[ V^{K,B}_{\Delta t}(x) = \max_{u_0,\dots,u_{K-1}\,\in\,\mathcal V}\ \
        \min_{0\,\le\, k\,\le\, K}\ c(x_k) \]</div>
     <img class="diagram" src="../assets/img/tree-search.svg" alt="">
     <ul>
@@ -147,7 +144,7 @@
       <li><span class="ix">\(\rho_{\mathrm{FU}}\)</span> <strong>false-unsafe</strong>:
           predicted unsafe, but the rollout stays safe</li>
       <li><span class="ix">\(\eta_{\mathrm{eff}}\)</span> <strong>effective safe
-          volume</strong>: share of states predicted and validated safe</li>
+          volume</strong>: ratio of states predicted and validated safe</li>
     </ul>
   </section>
 
@@ -170,17 +167,19 @@
     <figure>
       <img src="../assets/img/compare-ip.png" alt="">
       <figcaption>Inverted pendulum: <b>PDE-only</b> gives an empty safe set, <b>full-control
-        data</b> a conservative one, and <b>vertex data</b> (ours) the ground truth.</figcaption>
+        data</b> a conservative one, and <b>vertex data</b> (ours) closely approximates the
+        ground truth.</figcaption>
     </figure>
   </section>
 
   <section class="block grow">
-    <h2><span class="n">09</span>Results on 15 systems</h2>
+    <h2><span class="n">09</span>Results on 15 systems
+        (<span class="ix">\(\eta_{\mathrm{eff}}\)</span>)</h2>
     <div class="chart">
       <div class="legend">
         <span><i style="background:var(--bar-nd)"></i>PDE-only</span>
         <span><i style="background:var(--bar-fcd)"></i>Full-control data</span>
-        <span><i style="background:var(--bar-ours)"></i><strong>VertexCBF</strong></span>
+        <span><i style="background:var(--bar-ours)"></i><strong>VertexCBF (ours)</strong></span>
       </div>
       <div class="rows">
           <div class="row">
@@ -305,8 +304,8 @@
           </div>
       </div>
       <div class="axis"><span></span><div class="ticks"><span>0</span><span>0.5</span><span>1.0</span></div></div>
-      <p class="note">Effective safe volume <span class="ix">\(\eta_{\mathrm{eff}}\)</span>
-        (mean of five seeds); (state, input) dimensions in brackets.</p>
+      <p class="note">Mean of five seeds; <span class="ix">\((n_x, n_u)\)</span> in
+        brackets.</p>
     </div>
   </section>
 
@@ -323,7 +322,7 @@
     <div class="stat">
       <div class="v">≤ 1.2<small> %</small></div>
       <div class="k">false-safe rate on every system; baselines exceed 20&nbsp;% or return an
-        empty safe set on five</div>
+        empty safe set on six</div>
     </div>
     <div class="stat">
       <div class="v">96.4<small> %</small></div>

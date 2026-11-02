@@ -1,11 +1,10 @@
 """Turn the paper's vector figures and the raw logos into web assets.
 
-    python tools/make_assets.py [--src ../vertexcbf]
+    python tools/make_assets.py [--src ..]
 
-The sources are the git-ignored `paper/`, `dev/` and `logos/` working directories of a
-local checkout of the code repository (github.com/bojan-derajic/vertexcbf), by default a
-clone next to this one.  The generated PNG/SVG files under assets/ are tracked, so the
-site builds without them.
+The sources are the `paper/`, `dev/` and `logos/` folders that sit next to this repository
+(--src, by default its parent folder).  The generated PNG/SVG files under assets/ are
+tracked, so the site builds without them.
 """
 import argparse
 import pathlib
@@ -53,8 +52,8 @@ def convert(src: pathlib.Path, dst: pathlib.Path, long_edge: int) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--src", type=pathlib.Path, default=ROOT.parent / "vertexcbf",
-                    help="checkout of the code repository holding paper/, dev/, logos/")
+    ap.add_argument("--src", type=pathlib.Path, default=ROOT.parent,
+                    help="folder holding paper/, dev/ and logos/")
     src = ap.parse_args().src.resolve()
     paper, dev, logos = src / "paper/figures", src / "dev/figures", src / "logos"
     for d in (paper, dev, logos):

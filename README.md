@@ -36,14 +36,14 @@ pip install -r tools/requirements.txt
 python -m playwright install chromium
 
 python tools/fetch_vendor.py                    # (re)download Inter + KaTeX into assets/
-python tools/make_assets.py --src ../vertexcbf  # paper figures, logos, QR codes -> assets/
+python tools/make_assets.py                     # paper figures, logos, QR codes -> assets/
 python tools/make_diagrams.py                   # the schematic SVGs
 python tools/build_poster.py                    # poster.html -> A0 PDF + preview.jpg
 ```
 
-`make_assets.py` reads the git-ignored `paper/`, `dev/` and `logos/` working directories of a local
-checkout of the code repository (`--src`, by default a clone next to this one). The files it
-generates under `assets/` are committed, so the site builds without them.
+`make_assets.py` reads the `paper/`, `dev/` and `logos/` folders next to this repository (`--src`,
+by default its parent folder). The files it generates under `assets/` are committed, so the site
+builds without them.
 
 `build_poster.py` prints how full each poster column is and warns if a column or a display formula
 overflows — the poster must stay exactly one page.

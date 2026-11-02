@@ -41,7 +41,7 @@ body {
   height: 841mm;
   padding: 0 var(--pad) var(--pad);
   font-family: 'Inter', 'Liberation Sans', system-ui, sans-serif;
-  font-size: 26.5pt;
+  font-size: 27.5pt;
   line-height: 1.36;
   color: var(--body);
   -webkit-font-smoothing: antialiased;
@@ -51,7 +51,7 @@ body {
 
 /* ---------------------------------------------------------------- header */
 
-/* white band across the full poster width: title, logos, QR codes, tagline */
+/* white band across the full poster width: title, logos, QR codes */
 .top {
   margin: 0 calc(-1 * var(--pad));
   padding: var(--pad) var(--pad) 8mm;
@@ -68,8 +68,8 @@ body {
 
 h1 {
   margin: 0;
-  font-size: 76pt;
-  line-height: 1.05;
+  font-size: 81pt;
+  line-height: 1.08;
   font-weight: 800;
   letter-spacing: -0.018em;
   color: var(--ink);
@@ -78,14 +78,14 @@ h1 .lead { color: var(--accent); }
 h1 .nb { white-space: nowrap; }
 
 .authors {
-  margin: 7mm 0 0;
-  font-size: 30pt;
+  margin: 9mm 0 0;
+  font-size: 33pt;
   font-weight: 600;
   color: var(--ink);
 }
 .authors sup { font-weight: 500; color: var(--accent); font-size: 0.7em; }
 
-.affil { margin: 2mm 0 0; font-size: 21pt; color: var(--muted); }
+.affil { margin: 3mm 0 0; font-size: 23pt; color: var(--muted); }
 .affil sup { color: var(--accent); font-weight: 600; }
 
 .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 9mm; }
@@ -162,7 +162,7 @@ h2 {
   align-items: center;
   gap: 4mm;
   margin: 0 0 4.5mm;
-  font-size: 33pt;
+  font-size: 34.5pt;
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -173,12 +173,12 @@ h2 .n {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 15mm;
-  height: 12.5mm;
+  width: 15.5mm;
+  height: 13mm;
   border-radius: 2mm;
   background: var(--accent);
   color: #fff;
-  font-size: 23pt;
+  font-size: 24pt;
   font-weight: 700;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
@@ -223,7 +223,13 @@ strong { color: var(--ink); font-weight: 700; }
   font-weight: 600;
   color: var(--ink);
 }
-.arrow::before { content: "→  "; color: var(--accent); font-weight: 700; }
+.arrow::before {
+  content: "→  ";
+  position: relative;
+  top: -0.1em;
+  color: var(--accent);
+  font-weight: 700;
+}
 
 .sub { margin: 5mm 0 0; padding-top: 4mm; border-top: 0.35mm solid var(--rule); }
 
