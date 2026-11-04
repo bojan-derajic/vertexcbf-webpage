@@ -199,7 +199,8 @@
       <li>\(\rho_{\mathrm{FU}}\) — <strong>false-unsafe rate</strong>: the fraction of states
         outside the predicted safe set whose rollout stays safe. <em>How conservative is
         it?</em></li>
-      <li>\(\eta_{\mathrm{eff}}\) — <strong>effective safe volume</strong>: the share of the state
+      <li>\(\eta_{\mathrm{eff}} = \frac{\mathrm{vol}(\hat{\mathcal S})}{\mathrm{vol}(\mathcal X)}
+        (1-\rho_{\mathrm{FS}})\) — <strong>effective safe volume</strong>: the share of the state
         space that is both predicted <em>and</em> validated safe.</li>
     </ul>
     <p>A good method has small \(\rho_{\mathrm{FS}}\) and large \(\eta_{\mathrm{eff}}\). We compare
